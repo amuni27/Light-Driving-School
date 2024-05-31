@@ -7,5 +7,7 @@ Additional Functionality:
 2.	Discussion Forums: Implement discussion forums where students can engage in discussions, ask questions, and share experiences related to the course content.
 3.	Progress Tracking: Provide comprehensive tracking of student progress, including completed lessons, quiz scores, and overall course completion percentage.
 4.	Notification System: Incorporate a notification system to alert users about new course materials, upcoming quizzes, and important announcements.
-5.	Feedback Mechanism: Enable students to provide feedback on courses, lessons, and quizzes to improve the overall learning experience.
+5. Feedback Mechanism: Enable students to provide feedback on courses, lessons, and quizzes to improve the overall learning experience.
 
+### Class Diagram
+![](./class_diagram/AppliedSDproject.png)
