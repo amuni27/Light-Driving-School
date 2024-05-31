@@ -11,3 +11,6 @@ Additional Functionality:
 
 ### Class Diagram
 ![](./class_diagram/AppliedSDproject.png)
+
+### Class Diagram
+![](./class_diagram/architecture.png)
