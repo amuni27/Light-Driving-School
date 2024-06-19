@@ -6,6 +6,7 @@ import UserRoutes from "./routes/UserRoutes";
 import CourseRouter from "./routes/CourseRouter";
 import ModuleRouter from "./routes/ModuleRouter";
 import LessonRouter from "./routes/LessonRouter";
+import ContentRouter from "./routes/ContentRouter";
 
 require('dotenv').config();
 
@@ -20,6 +21,7 @@ app.use('/users', UserRoutes)
 app.use('/courses', CourseRouter)
 app.use('/modules', ModuleRouter)
 app.use('/lessons', LessonRouter)
+app.use('/contents', ContentRouter)
 
 app.use((req: Request, res: Response, next: NextFunction): void => {
     res.status(404).send('Not Found');
