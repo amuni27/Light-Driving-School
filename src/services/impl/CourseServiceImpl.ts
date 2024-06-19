@@ -85,4 +85,38 @@ export class CourseServiceImpl implements CourseService {
             throw error;
         }
     }
+
+    async addModuleToCourse(courseId: string, moduleId: string, moduleNumber: number): Promise<boolean> {
+        try {
+            const course = await Course.findById(courseId);
+            if (!course) {
+                throw new Error("Cant not found course with id ${courseId}`);");
+            }
+
+            await Course.updateOne(
+                {_id: courseId},
+                {$push: {modules: {_id: moduleId, number: moduleNumber}}}
+            );
+
+            return true;
+        } catch (error) {
+            console.error('Error adding module to course:', error);
+            throw new Error('Error adding module to course:' + error); // Update failed
+        }
+    }
+
+    async deleteModuleToCourse(moduleId: string, courseId: string): Promise<boolean> {
+        try {
+            const course = await Course.findByIdAndUpdate(
+                courseId,
+                {$pull: {modules: {_id: moduleId}}},
+                {new: true}
+            );
+            return true;
+        } catch (error) {
+            console.error('Error deleting module to course:', error);
+            throw new Error('Error deleting module to course:' + error);
+        }
+    }
+
 }

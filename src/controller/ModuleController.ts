@@ -12,7 +12,6 @@ export class ModuleController {
     addModule = (req: Request, res: Response): void => {
         if (req.user) {
             req.body.addedBy = req.user.id;
-            console.log("what's up", req.user.id)
         } else res.status(400).send("You are not logged in.");
         this.moduleService.addModules(req.body)
             .then(data => res.status(201).send(data))

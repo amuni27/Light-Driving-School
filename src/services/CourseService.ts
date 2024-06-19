@@ -14,4 +14,7 @@ export interface CourseService {
     findCourse(id: string): Promise<CourseResponseDto>;
 
     findAllCourse(): Promise<CourseResponseDto[]>;
+
+    addModuleToCourse(courseId: string, moduleId: string | unknown, moduleNumber: number | unknown): Promise<boolean>;
+    deleteModuleToCourse(courseId: string, moduleId: string| unknown): Promise<boolean>;
 }
