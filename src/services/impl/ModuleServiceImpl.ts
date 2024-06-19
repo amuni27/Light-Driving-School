@@ -3,7 +3,7 @@ import {ModulesRequestDto} from "../../dto/ModulesRequestDto";
 import {ModulesResponseDto} from "../../dto/ModulesResponseDto";
 import Course from "../../model/Course";
 import {MappingService} from "../../utils/transform";
-import {Error} from "mongoose";
+import mongoose, {Error} from "mongoose";
 import Modules from "../../model/Modules";
 import {CourseService} from "../CourseService";
 import {CourseServiceImpl} from "./CourseServiceImpl";
@@ -22,6 +22,8 @@ export class ModuleServiceImpl implements ModuleService {
 
     async addModules(modulesRequestDto: ModulesRequestDto): Promise<ModulesResponseDto> {
         try {
+            const session = await mongoose.startSession();
+            session.startTransaction();
             const module = new Modules(modulesRequestDto);
             const savedModule = await module.save()
             if (!savedModule) {
@@ -34,6 +36,8 @@ export class ModuleServiceImpl implements ModuleService {
             }
 
             const moduleResult = await savedModule.populate("addedBy")
+            await session.commitTransaction();
+            await session.endSession();
             return this.mappingService.transformToDTO(moduleResult)
         } catch (error) {
             throw error;
@@ -64,15 +68,19 @@ export class ModuleServiceImpl implements ModuleService {
 
     async deleteModules(moduleId: string): Promise<boolean> {
         try {
+            const session = await mongoose.startSession();
+            session.startTransaction();
             const foundedModule = await Module.findById(moduleId);
             if (!foundedModule) {
-                 throw new Error(`Module with id ${moduleId} not found`);
+                throw new Error(`Module with id ${moduleId} not found`);
             }
             const result = await this.courseService.deleteModuleToCourse(moduleId, foundedModule.courseId)
-            if(!result){
+            if (!result) {
                 throw new Error(`Failed to delete user with id ${moduleId}`);
             }
             const module = await Modules.deleteOne({_id: moduleId});
+            await session.commitTransaction();
+            await session.endSession();
             if (module.deletedCount > 0) return true;
             else throw new Error(`Module with id ${moduleId} not found and cannot be deleted`);
         } catch (error) {
@@ -103,6 +111,41 @@ export class ModuleServiceImpl implements ModuleService {
             return modules.map(data => this.mappingService.transformToDTO(data));
         } catch (error) {
             throw error;
+        }
+    }
+
+    async addLessonTOModule(moduleId: string, lessonId: string, lessonNumber: number): Promise<boolean> {
+        try {
+            const module = await Module.findById(moduleId);
+            if (!module) {
+                throw new Error("Cant not found module with id ${moduleId}`);");
+            }
+
+            const updatedModule = await Module.updateOne(
+                {_id: moduleId},
+                {$push: {lessons: {_id: lessonId, number: lessonNumber}}}
+            );
+            if (!updatedModule.acknowledged) {
+                throw new Error(`Cannot add lesson to Module with id ${moduleId}`);
+            }
+            return true;
+        } catch (error) {
+            console.error('Error adding module to course:', error);
+            throw new Error('Error adding module to course:' + error); // Update failed
+        }
+    }
+
+    async deleteModuleToCourse(lessonId: string, moduleId: string): Promise<boolean> {
+        try {
+            const module = await Module.findByIdAndUpdate(
+                moduleId,
+                {$pull: {lessons: {_id: lessonId}}},
+                {new: true}
+            );
+            return true;
+        } catch (error) {
+            console.error('Error deleting module to course:', error);
+            throw new Error('Error deleting module to course:' + error);
         }
     }
 }

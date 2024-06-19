@@ -1,5 +1,3 @@
-import {CourseRequestDto} from "../dto/CourseRequestDto";
-import {CourseResponseDto} from "../dto/CourseResponseDto";
 import {ModulesRequestDto} from "../dto/ModulesRequestDto";
 import {ModulesResponseDto} from "../dto/ModulesResponseDto";
 
@@ -14,4 +12,8 @@ export interface ModuleService {
     findModules(id: string): Promise<ModulesResponseDto>;
 
     findAllModules(): Promise<ModulesResponseDto[]>;
+
+    addLessonTOModule(moduleId: string, lessonId: string| unknown, lessonNumber: number| unknown): Promise<boolean>;
+
+    deleteModuleToCourse(lessonId: string , moduleId: string| unknown): Promise<boolean>;
 }
