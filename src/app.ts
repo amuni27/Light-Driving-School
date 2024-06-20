@@ -8,6 +8,7 @@ import ModuleRouter from "./routes/ModuleRouter";
 import LessonRouter from "./routes/LessonRouter";
 import ContentRouter from "./routes/ContentRouter";
 import QuizRouter from "./routes/QuizRouter";
+import QuestionsRouter from "./routes/QuestionsRouter";
 
 require('dotenv').config();
 
@@ -24,6 +25,7 @@ app.use('/modules', ModuleRouter)
 app.use('/lessons', LessonRouter)
 app.use('/contents', ContentRouter)
 app.use('/quizzes', QuizRouter)
+app.use('/questions', QuestionsRouter)
 
 app.use((req: Request, res: Response, next: NextFunction): void => {
     res.status(404).send('Not Found');

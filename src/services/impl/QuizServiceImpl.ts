@@ -105,11 +105,38 @@ export class QuizServiceImpl implements QuizService {
         }
     }
 
-    addQuestionTOQuiz(quizId: string, lessonId: string): Promise<boolean> {
-        throw new Error("Method not implemented.");
+    async addQuestionTOQuiz(quizId: string, questionID: string, questionNumber: number): Promise<boolean> {
+        try {
+            const quiz = await Quiz.findById(quizId);
+            if (!quiz) {
+                throw new Error("Cant not found Quiz with id ${lessonId}`);");
+            }
+
+            const updatedLesson = await Quiz.updateOne(
+                {_id: quizId},
+                {$push: {questions: {_id: questionID, number: questionNumber}}}
+            );
+            if (!updatedLesson.acknowledged) {
+                throw new Error(`Cannot add content to Lesson with id ${questionID}`);
+            }
+            return true;
+        } catch (error) {
+            console.error('Error adding content to Lesson:', error);
+            throw new Error('Error adding content to lesson:' + error); // Update failed
+        }
     }
 
-    deleteQuestionFromQuiz(quizId: string, lessonId: string): Promise<boolean> {
-        throw new Error("Method not implemented.");
+    async deleteQuestionFromQuiz(questionId: string, quizId: string): Promise<boolean> {
+        try {
+            const lesson = await Quiz.findByIdAndUpdate(
+                quizId,
+                {$pull: {questions: {_id: questionId}}},
+                {new: true}
+            );
+            return true;
+        } catch (error) {
+            console.error('Error deleting content from Lesson:', error);
+            throw new Error('Error deleting content from Lesson:' + error);
+        }
     }
 }

@@ -3,12 +3,13 @@ import {ContentType} from "./ContentType";
 import {UserResponseDTO} from "../dto/UserResponseDTO";
 
 export interface QuestionType {
-    quiz: string,
+    quizId: string,
     options: [{
         _id: string,
         choiceLetter: string,
     }], // Array of options for the question
-    correctAnswerIndex: { type: Number, required: true },
+    correctAnswerIndex: number,
+    questionNumber: number,
     addedBy: UserResponseDTO
 }
 

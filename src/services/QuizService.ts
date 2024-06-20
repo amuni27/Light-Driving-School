@@ -13,7 +13,7 @@ export interface QuizService {
 
     findAllQuiz(): Promise<QuizResponseDto[]>;
 
-    addQuestionTOQuiz(quizId: string, lessonId: string): Promise<boolean>;
+    addQuestionTOQuiz(quizId: string, questionID: string, questionNumber: number): Promise<boolean>;
 
-    deleteQuestionFromQuiz(quizId: string, lessonId: string): Promise<boolean>;
+    deleteQuestionFromQuiz( questionId: string,quizId: string): Promise<boolean>;
 }
