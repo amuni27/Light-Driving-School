@@ -6,6 +6,7 @@ import mongoose, {Error} from "mongoose";
 import {ModuleServiceImpl} from "./ModuleServiceImpl";
 import {ModuleService} from "../ModuleService";
 import {LessonService} from "../LessonService";
+import Module from "../../model/Modules";
 
 export class LessonServiceImpl implements LessonService {
     private mappingService;
@@ -108,5 +109,40 @@ export class LessonServiceImpl implements LessonService {
             throw error;
         }
 
+    }
+
+    async addContentTOLesson(lessonId: string, contentId: string, contentNumber: number): Promise<boolean> {
+        try {
+            const lesson = await Lesson.findById(lessonId);
+            if (!lesson) {
+                throw new Error("Cant not found Lesson with id ${lessonId}`);");
+            }
+
+            const updatedLesson = await Lesson.updateOne(
+                {_id: lessonId},
+                {$push: {contents: {_id: contentId, number: contentNumber}}}
+            );
+            if (!updatedLesson.acknowledged) {
+                throw new Error(`Cannot add content to Module with id ${contentId}`);
+            }
+            return true;
+        } catch (error) {
+            console.error('Error adding content to Lesson:', error);
+            throw new Error('Error adding content to lesson:' + error); // Update failed
+        }
+    }
+
+    async deleteContentFromLesson(contentId: string, lessonId: string): Promise<boolean> {
+        try {
+            const module = await Module.findByIdAndUpdate(
+                lessonId,
+                {$pull: {contents: {_id: contentId}}},
+                {new: true}
+            );
+            return true;
+        } catch (error) {
+            console.error('Error deleting content from Lesson:', error);
+            throw new Error('Error deleting content from Lesson:' + error);
+        }
     }
 }

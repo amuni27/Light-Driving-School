@@ -1,6 +1,7 @@
 import {Request, Response} from "express";
 import {ContentServiceImpl} from "../services/impl/ContentServiceImpl";
 import {ContentService} from "../services/ContentService";
+import {ContentConstant} from "../constant/Constant";
 
 export class ContentController {
     ContentService: ContentService;
@@ -11,7 +12,7 @@ export class ContentController {
 
     addContent = (req: Request, res: Response): void => {
         if (req.user) {
-            req.body.addedBy = req.user.id;
+            req.body.addedBy = req.user.id
         } else res.status(400).send("You are not logged in.");
         this.ContentService.addContent(req.body)
             .then(data => res.status(201).send(data))

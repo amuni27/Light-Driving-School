@@ -13,5 +13,9 @@ export interface LessonService {
 
     findAllLesson(): Promise<LessonResponseDto[]>;
 
+    addContentTOLesson(lessonId: string, contentId: string, contentNumber: number): Promise<boolean>;
+
+    deleteContentFromLesson(contentId: string, lessonId: string): Promise<boolean>;
+
 
 }

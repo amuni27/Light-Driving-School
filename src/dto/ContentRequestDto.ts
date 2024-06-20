@@ -1,14 +1,19 @@
-import {ContentType} from "../constant/Constant";
+import {ContentConstant} from "../constant/Constant";
 import {Schema} from "mongoose";
 import {type} from "node:os";
 import content from "../model/Content";
 import {IsNotEmpty} from "class-validator";
+import {ContentType} from "../types/ContentType";
 
 export class ContentRequestDto {
     @IsNotEmpty()
-    private _type: ContentType;
+    private _type: ContentConstant;
     @IsNotEmpty()
-    private _content: Schema.Types.Mixed;
+    private _title: string;
+
+    private _url: string;
+    @IsNotEmpty()
+    private _description: string;
     @IsNotEmpty()
     private _addedBy: string;
     @IsNotEmpty()
@@ -17,33 +22,53 @@ export class ContentRequestDto {
     private _lessonId: string;
 
 
-    constructor(type: ContentType, content: Schema.Types.Mixed, addedBy: string, contentNumber: number, lessonId: string) {
+    get title(): string {
+        return this._title;
+    }
+
+    set title(value: string) {
+        this._title = value;
+    }
+
+    get url(): string {
+        return this._url;
+    }
+
+    set url(value: string) {
+        this._url = value;
+    }
+
+    get description(): string {
+        return this._description;
+    }
+
+    set description(value: string) {
+        this._description = value;
+    }
+
+
+
+
+    constructor(type: ContentConstant, title: string, url: string, description: string, addedBy: string, contentNumber: number, lessonId: string) {
 
         this._type = type;
-        this._content = content;
+        this._title = title;
+        this._url = url;
+        this._description = description;
         this._addedBy = addedBy;
         this._contentNumber = contentNumber;
         this._lessonId = lessonId;
     }
 
 
-
-
-    get type(): ContentType {
+    get type(): ContentConstant {
         return this._type;
     }
 
-    set type(value: ContentType) {
+    set type(value: ContentConstant) {
         this._type = value;
     }
 
-    get content(): Schema.Types.Mixed {
-        return this._content;
-    }
-
-    set content(value: Schema.Types.Mixed) {
-        this._content = value;
-    }
 
     get addedBy(): string {
         return this._addedBy;

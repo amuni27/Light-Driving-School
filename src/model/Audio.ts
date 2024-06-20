@@ -1,8 +1,10 @@
-import mongoose, {Schema} from 'mongoose';
+import mongoose, {Model, Schema} from 'mongoose';
+import Content from "./Content";
+import {AudioType} from "../types/ContentType";
 
-const AudioSchema = new Schema({
-    title: {type: String, required: true},
+const audioSchema = new Schema({
     url: {type: String, required: true},
     description: {type: String, required: true},
 })
-const Audio = mongoose.model('Audio', AudioSchema);
+const AudioContent:Model<AudioType> = Content.discriminator<AudioType>('Audio', audioSchema);
+export default AudioContent;

@@ -7,7 +7,7 @@ export interface ContentService {
 
     updateContent(contentId: string, contentRequest: ContentRequestDto): Promise<ContentResponseDto>;
 
-    deleteContent(contentId: string): Promise<ContentResponseDto>;
+    deleteContent(contentId: string): Promise<boolean>;
 
     findContent(contentId: string): Promise<ContentResponseDto>;
 
