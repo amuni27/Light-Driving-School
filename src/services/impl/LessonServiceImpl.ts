@@ -18,10 +18,9 @@ export class LessonServiceImpl implements LessonService {
         this.moduleService = new ModuleServiceImpl();
     }
 
+
     async addLesson(lessonRequestDto: LessonRequestDto): Promise<LessonResponseDto> {
         try {
-            const session = await mongoose.startSession();
-            session.startTransaction();
             const lesson = new Lesson(lessonRequestDto);
             const savedLesson = await lesson.save();
             if (!savedLesson) {
@@ -33,8 +32,6 @@ export class LessonServiceImpl implements LessonService {
             }
 
             const moduleResult = await savedLesson.populate("addedBy")
-            await session.commitTransaction();
-            await session.endSession();
             return this.mappingService.transformToDTO(moduleResult)
         } catch (error) {
             throw error;
@@ -79,7 +76,7 @@ export class LessonServiceImpl implements LessonService {
             await session.commitTransaction();
             await session.endSession();
             if (module.deletedCount > 0) return true;
-            else throw new Error(`Module with id ${lessonId} not found and cannot be deleted`);
+            else throw new Error(`Lesson with id ${lessonId} not found and cannot be deleted`);
         } catch (error) {
             throw error;
         }
@@ -123,7 +120,7 @@ export class LessonServiceImpl implements LessonService {
                 {$push: {contents: {_id: contentId, number: contentNumber}}}
             );
             if (!updatedLesson.acknowledged) {
-                throw new Error(`Cannot add content to Module with id ${contentId}`);
+                throw new Error(`Cannot add content to Lesson with id ${contentId}`);
             }
             return true;
         } catch (error) {
@@ -134,9 +131,44 @@ export class LessonServiceImpl implements LessonService {
 
     async deleteContentFromLesson(contentId: string, lessonId: string): Promise<boolean> {
         try {
-            const module = await Module.findByIdAndUpdate(
+            const lesson = await Lesson.findByIdAndUpdate(
                 lessonId,
                 {$pull: {contents: {_id: contentId}}},
+                {new: true}
+            );
+            return true;
+        } catch (error) {
+            console.error('Error deleting content from Lesson:', error);
+            throw new Error('Error deleting content from Lesson:' + error);
+        }
+    }
+
+    async addQuizTOLesson(quizId: string, lessonId: string): Promise<boolean> {
+        try {
+            const lesson = await Lesson.findById(lessonId);
+            if (!lesson) {
+                throw new Error("Cant not found Lesson with id ${lessonId}`);");
+            }
+
+            const updatedLesson = await Lesson.updateOne(
+                {_id: lessonId},
+                {quiz: quizId}
+            );
+            if (!updatedLesson.acknowledged) {
+                throw new Error(`Cannot add quiz to Lesson with id ${quizId}`);
+            }
+            return true;
+        } catch (error) {
+            console.error('Error adding quiz to Lesson:', error);
+            throw new Error('Error adding quiz to lesson:' + error); // Update failed
+        }
+    }
+
+    async deleteQuizFromLesson(lessonId: string): Promise<boolean> {
+        try {
+            const lesson = await Lesson.findByIdAndUpdate(
+                lessonId,
+                {quiz: null},
                 {new: true}
             );
             return true;

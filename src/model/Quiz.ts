@@ -1,6 +1,15 @@
-import {Schema} from "mongoose";
+import mongoose, {Schema} from "mongoose";
 
 const QuizSchema: Schema = new Schema({
-    lesson: { type: Schema.Types.ObjectId, ref: 'Lesson', required: true }, // Reference to course document
-    question: [{ type: Schema.Types.ObjectId, ref: 'Question', required: true }],
+    title: {type: String, required: true},
+    description: {type: String, required: true},
+    lessonId: {type: Schema.Types.ObjectId, ref: 'Lesson', required: true}, // Reference to course document
+    question: [{
+        _id: {type: Schema.Types.ObjectId, ref: 'Question', required: true},
+        number: {type: Number, required: true}
+    }],
+    addedBy: {type: Schema.Types.ObjectId, ref: 'User'},
 });
+
+const Quiz = mongoose.model("Quiz", QuizSchema);
+export default Quiz;

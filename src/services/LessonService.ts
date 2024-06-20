@@ -17,5 +17,9 @@ export interface LessonService {
 
     deleteContentFromLesson(contentId: string, lessonId: string): Promise<boolean>;
 
+    addQuizTOLesson(quizId: string | unknown, lessonId: string): Promise<boolean>;
+
+    deleteQuizFromLesson(lessonId: string| unknown): Promise<boolean>;
+
 
 }

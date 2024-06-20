@@ -4,10 +4,10 @@ import {ContentService} from "../ContentService";
 import {MappingService} from "../../utils/transform";
 import {ContentConstant} from "../../constant/Constant";
 import Content from "../../model/Content";
-import ImageContent from "../../model/Image";
-import AudioContent from "../../model/Audio";
-import VideoContent from "../../model/VIdeo";
-import TextContent from "../../model/Text";
+import {ImageContent} from "../../model/Image";
+import {AudioContent} from "../../model/Audio";
+import {VideoContent} from "../../model/VIdeo";
+import {TextContent} from "../../model/Text";
 import {LessonServiceImpl} from "./LessonServiceImpl";
 import {LessonService} from "../LessonService";
 import mongoose, {Error} from "mongoose";
@@ -26,8 +26,6 @@ export class ContentServiceImpl implements ContentService {
     async addContent(contentRequestDto: ContentRequestDto): Promise<ContentResponseDto> {
         try {
             const content = this.createContent(contentRequestDto);
-            console.log(contentRequestDto)
-            console.log(content)
 
             if (!content) {
                 throw new Error(`Unsupported content type: ${contentRequestDto.type}`);
@@ -42,7 +40,7 @@ export class ContentServiceImpl implements ContentService {
                 throw new Error("Could not save content");
             }
 
-            return this.mappingService.transformToDTO(savedContent);
+            return this.mappingService.transformToDTO(savedContent.populate("addedBy"));
         } catch (error) {
             console.error(`Error in addContent: ${error}`);
             throw error;
