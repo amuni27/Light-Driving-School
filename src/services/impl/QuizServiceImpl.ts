@@ -8,6 +8,7 @@ import {MappingService} from "../../utils/transform";
 import {LessonServiceImpl} from "./LessonServiceImpl";
 import {LessonService} from "../LessonService";
 import Lesson from "../../model/Lesson";
+import {QuizError} from "../../exceptions/QuizError";
 
 
 export class QuizServiceImpl implements QuizService {
@@ -25,40 +26,39 @@ export class QuizServiceImpl implements QuizService {
             const quiz = new Quiz(quizRequestDto);
             const savedQuiz = await quiz.save();
             if (!savedQuiz) {
-                throw new Error("Can't save lesson");
+                throw new QuizError("Can't save lesson");
             }
 
             const result = await this.lessonService.addQuizTOLesson(savedQuiz._id, quizRequestDto.lessonId);
             if (!result) {
-                throw new Error("Could not add quiz to lesson");
+                throw new QuizError("Could not add quiz to lesson");
             }
 
             const moduleResult = await savedQuiz.populate("addedBy")
             return this.mappingService.transformToDTO(moduleResult)
         } catch (error) {
-            throw error;
-        }
+            throw new QuizError(`Error in add quiz: ${error}`);            }
     }
 
     async updateQuiz(id: string, quizRequestDto: QuizRequestDto): Promise<string> {
         try {
             const quiz = await Quiz.findById(id);
             if (!quiz) {
-                throw new Error(`Quiz with id ${id} not found`);
+                throw new QuizError(`Quiz with id ${id} not found`);
             }
 
             const result = await Quiz.updateOne({_id: id}, quizRequestDto);
             if (!result) {
-                throw new Error(`Failed to update Quiz with id ${id}`);
+                throw new QuizError(`Failed to update Quiz with id ${id}`);
             }
 
             if (result.modifiedCount === 0) {
-                throw new Error(`No fields were updated for quiz with id ${id}`);
+                throw new QuizError(`No fields were updated for quiz with id ${id}`);
             }
 
             return "lesson updated successfully";
         } catch (error) {
-            throw error;
+            throw new QuizError(`Error in update quiz: ${error}`);
         }
     }
 
@@ -66,17 +66,17 @@ export class QuizServiceImpl implements QuizService {
         try {
             const foundedQuiz = await Quiz.findById(quizId);
             if (!foundedQuiz) {
-                throw new Error(`Quiz with id ${quizId} not found`);
+                throw new QuizError(`Quiz with id ${quizId} not found`);
             }
             const result = await this.lessonService.deleteQuizFromLesson(foundedQuiz.lessonId)
             if (!result) {
-                throw new Error(`Failed to delete quiz with id ${foundedQuiz.lessonId}`);
+                throw new QuizError(`Failed to delete quiz with id ${foundedQuiz.lessonId}`);
             }
             const quiz = await Quiz.deleteOne({_id: quizId});
             if (quiz.deletedCount > 0) return true;
-            else throw new Error(`Quiz with id ${quizId} not found and cannot be deleted`);
+            else throw new QuizError(`Quiz with id ${quizId} not found and cannot be deleted`);
         } catch (error) {
-            throw error;
+            throw new QuizError(`Error in delete quiz: ${error}`);
         }
     }
 
@@ -84,12 +84,12 @@ export class QuizServiceImpl implements QuizService {
         try {
             const quiz = await Quiz.findById(id).populate('addedBy');
             if (!quiz) {
-                throw new Error(`Quiz with id ${id} not found`);
+                throw new QuizError(`Quiz with id ${id} not found`);
             }
 
             return this.mappingService.transformToDTO(quiz);
         } catch (error) {
-            throw error;
+            throw new QuizError(`Error in find quiz: ${error}`);
         }
     }
 
@@ -97,11 +97,11 @@ export class QuizServiceImpl implements QuizService {
         try {
             const quiz = await Quiz.find().populate('addedBy');
             if (!quiz) {
-                throw new Error("Lesson not found");
+                throw new QuizError("Lesson not found");
             }
             return quiz.map(data => this.mappingService.transformToDTO(data));
         } catch (error) {
-            throw error;
+            throw new QuizError(`Error in find quiz: ${error}`);
         }
     }
 
@@ -109,7 +109,7 @@ export class QuizServiceImpl implements QuizService {
         try {
             const quiz = await Quiz.findById(quizId);
             if (!quiz) {
-                throw new Error("Cant not found Quiz with id ${lessonId}`);");
+                throw new QuizError("Cant not found Quiz with id ${lessonId}`);");
             }
 
             const updatedLesson = await Quiz.updateOne(
@@ -117,12 +117,12 @@ export class QuizServiceImpl implements QuizService {
                 {$push: {questions: {_id: questionID, number: questionNumber}}}
             );
             if (!updatedLesson.acknowledged) {
-                throw new Error(`Cannot add content to Lesson with id ${questionID}`);
+                throw new QuizError(`Cannot add content to Lesson with id ${questionID}`);
             }
             return true;
         } catch (error) {
             console.error('Error adding content to Lesson:', error);
-            throw new Error('Error adding content to lesson:' + error); // Update failed
+            throw new QuizError('Error adding content to lesson:' + error); // Update failed
         }
     }
 
@@ -136,7 +136,7 @@ export class QuizServiceImpl implements QuizService {
             return true;
         } catch (error) {
             console.error('Error deleting content from Lesson:', error);
-            throw new Error('Error deleting content from Lesson:' + error);
+            throw new QuizError('Error deleting content from Lesson:' + error);
         }
     }
 }

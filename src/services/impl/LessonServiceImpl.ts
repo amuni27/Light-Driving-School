@@ -7,6 +7,7 @@ import {ModuleServiceImpl} from "./ModuleServiceImpl";
 import {ModuleService} from "../ModuleService";
 import {LessonService} from "../LessonService";
 import Module from "../../model/Modules";
+import {LessonError} from "../../exceptions/LessonError";
 
 export class LessonServiceImpl implements LessonService {
     private mappingService;
@@ -24,30 +25,29 @@ export class LessonServiceImpl implements LessonService {
             const lesson = new Lesson(lessonRequestDto);
             const savedLesson = await lesson.save();
             if (!savedLesson) {
-                throw new Error("Can't save lesson");
+                throw new LessonError("Can't save lesson");
             }
             const result = await this.moduleService.addLessonTOModule(lessonRequestDto.moduleId, savedLesson._id, savedLesson.lessonNumber);
             if (!result) {
-                throw new Error("Could not add lesson to course");
+                throw new LessonError("Could not add lesson to course");
             }
 
             const moduleResult = await savedLesson.populate("addedBy")
             return this.mappingService.transformToDTO(moduleResult)
         } catch (error) {
-            throw error;
-        }
+            throw new LessonError(`Error in add lesson: ${error}`);           }
     }
 
     async updateLesson(id: string, lessonRequestDto: LessonRequestDto): Promise<string> {
         try {
             const lesson = await Lesson.findById(id);
             if (!lesson) {
-                throw new Error(`lesson with id ${id} not found`);
+                throw new LessonError(`lesson with id ${id} not found`);
             }
 
             const result = await Lesson.updateOne({_id: id}, lessonRequestDto);
             if (!result) {
-                throw new Error(`Failed to update lesson with id ${id}`);
+                throw new LessonError(`Failed to update lesson with id ${id}`);
             }
 
             if (result.modifiedCount === 0) {
@@ -56,7 +56,7 @@ export class LessonServiceImpl implements LessonService {
 
             return "lesson updated successfully";
         } catch (error) {
-            throw error;
+            throw new LessonError(`Error in update lesson: ${error}`);
         }
     }
 
@@ -66,32 +66,31 @@ export class LessonServiceImpl implements LessonService {
             session.startTransaction();
             const foundedLesson = await Lesson.findById(lessonId);
             if (!foundedLesson) {
-                throw new Error(`Lesson with id ${lessonId} not found`);
+                throw new LessonError(`Lesson with id ${lessonId} not found`);
             }
             const result = await this.moduleService.deleteModuleToCourse(lessonId, foundedLesson.moduleId)
             if (!result) {
-                throw new Error(`Failed to delete lesson with id ${lessonId}`);
+                throw new LessonError(`Failed to delete lesson with id ${lessonId}`);
             }
             const module = await Lesson.deleteOne({_id: lessonId});
             await session.commitTransaction();
             await session.endSession();
             if (module.deletedCount > 0) return true;
-            else throw new Error(`Lesson with id ${lessonId} not found and cannot be deleted`);
+            else throw new LessonError(`Lesson with id ${lessonId} not found and cannot be deleted`);
         } catch (error) {
-            throw error;
-        }
+            throw new LessonError(`Error in delete lesson: ${error}`);        }
     }
 
     async findLesson(id: string): Promise<LessonResponseDto> {
         try {
             const lesson = await Lesson.findById(id).populate('addedBy');
             if (!lesson) {
-                throw new Error(`Lesson with id ${id} not found`);
+                throw new LessonError(`Lesson with id ${id} not found`);
             }
 
             return this.mappingService.transformToDTO(lesson);
         } catch (error) {
-            throw error;
+            throw new LessonError(`Error in find  lesson: ${error}`);
         }
     }
 
@@ -99,11 +98,11 @@ export class LessonServiceImpl implements LessonService {
         try {
             const lesson = await Lesson.find().populate('addedBy');
             if (!lesson) {
-                throw new Error("Lesson not found");
+                throw new LessonError("Lesson not found");
             }
             return lesson.map(data => this.mappingService.transformToDTO(data));
         } catch (error) {
-            throw error;
+            throw new LessonError(`Error in find all lesson: ${error}`);
         }
 
     }
@@ -112,7 +111,7 @@ export class LessonServiceImpl implements LessonService {
         try {
             const lesson = await Lesson.findById(lessonId);
             if (!lesson) {
-                throw new Error("Cant not found Lesson with id ${lessonId}`);");
+                throw new LessonError("Cant not found Lesson with id ${lessonId}`);");
             }
 
             const updatedLesson = await Lesson.updateOne(
@@ -120,12 +119,12 @@ export class LessonServiceImpl implements LessonService {
                 {$push: {contents: {_id: contentId, number: contentNumber}}}
             );
             if (!updatedLesson.acknowledged) {
-                throw new Error(`Cannot add content to Lesson with id ${contentId}`);
+                throw new LessonError(`Cannot add content to Lesson with id ${contentId}`);
             }
             return true;
         } catch (error) {
             console.error('Error adding content to Lesson:', error);
-            throw new Error('Error adding content to lesson:' + error); // Update failed
+            throw new LessonError('Error adding content to lesson:' + error); // Update failed
         }
     }
 
@@ -139,7 +138,7 @@ export class LessonServiceImpl implements LessonService {
             return true;
         } catch (error) {
             console.error('Error deleting content from Lesson:', error);
-            throw new Error('Error deleting content from Lesson:' + error);
+            throw new LessonError('Error deleting content from Lesson:' + error);
         }
     }
 
@@ -147,7 +146,7 @@ export class LessonServiceImpl implements LessonService {
         try {
             const lesson = await Lesson.findById(lessonId);
             if (!lesson) {
-                throw new Error("Cant not found Lesson with id ${lessonId}`);");
+                throw new LessonError("Cant not found Lesson with id ${lessonId}`);");
             }
 
             const updatedLesson = await Lesson.updateOne(
@@ -155,12 +154,12 @@ export class LessonServiceImpl implements LessonService {
                 {quiz: quizId}
             );
             if (!updatedLesson.acknowledged) {
-                throw new Error(`Cannot add quiz to Lesson with id ${quizId}`);
+                throw new LessonError(`Cannot add quiz to Lesson with id ${quizId}`);
             }
             return true;
         } catch (error) {
             console.error('Error adding quiz to Lesson:', error);
-            throw new Error('Error adding quiz to lesson:' + error); // Update failed
+            throw new LessonError('Error adding quiz to lesson:' + error); // Update failed
         }
     }
 
@@ -174,7 +173,7 @@ export class LessonServiceImpl implements LessonService {
             return true;
         } catch (error) {
             console.error('Error deleting content from Lesson:', error);
-            throw new Error('Error deleting content from Lesson:' + error);
+            throw new LessonError('Error deleting content from Lesson:' + error);
         }
     }
 }

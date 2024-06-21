@@ -1,4 +1,5 @@
 import mongoose, {Schema} from "mongoose";
+import {ICourse} from "../types/model type/ICourse";
 
 const CourseSchema: Schema = new Schema({
     title: {type: String, required: true},
@@ -11,6 +12,6 @@ const CourseSchema: Schema = new Schema({
     addedBy: {type: Schema.Types.ObjectId, ref: 'User'}
 }, {timestamps: true});
 
-const Course = mongoose.model('Course', CourseSchema);
+const Course = mongoose.model<ICourse>('Course', CourseSchema);
 
 export default Course;

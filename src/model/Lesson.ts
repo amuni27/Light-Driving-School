@@ -1,4 +1,5 @@
 import mongoose, {Schema} from "mongoose";
+import {ILesson} from "../types/model type/ILesson";
 
 const LessonSchema: Schema = new Schema({
     title: {type: String, required: true},
@@ -13,6 +14,6 @@ const LessonSchema: Schema = new Schema({
     quiz: {type: Schema.Types.ObjectId, ref: 'Quiz'},
 });
 
-const Lesson = mongoose.model("Lesson", LessonSchema);
+const Lesson = mongoose.model<ILesson>("Lesson", LessonSchema);
 export default Lesson;
 

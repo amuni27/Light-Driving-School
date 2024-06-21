@@ -4,6 +4,7 @@ import {CourseResponseDto} from "../../dto/CourseResponseDto";
 import Course from "../../model/Course";
 import {MappingService} from "../../utils/transform";
 import {Error} from "mongoose";
+import {CourseError} from "../../exceptions/CourseError";
 
 
 export class CourseServiceImpl implements CourseService {
@@ -21,7 +22,7 @@ export class CourseServiceImpl implements CourseService {
             console.log(result)
             return this.mappingService.transformToDTO(result)
         } catch (error) {
-            throw error;
+            throw new CourseError(`Error in add course: ${error}`);
         }
 
     }
@@ -30,21 +31,21 @@ export class CourseServiceImpl implements CourseService {
         try {
             const course = await Course.findById(id);
             if (!course) {
-                throw new Error(`Course with id ${id} not found`);
+                throw new CourseError(`Course with id ${id} not found`);
             }
 
             const result = await Course.updateOne({_id: id}, courseRequestDto);
             if (!result) {
-                throw new Error(`Failed to update user with id ${id}`);
+                throw new CourseError(`Failed to update user with id ${id}`);
             }
 
             if (result.modifiedCount === 0) {
-                throw new Error(`No fields were updated for user with id ${id}`);
+                throw new CourseError(`No fields were updated for user with id ${id}`);
             }
 
             return true;
         } catch (error) {
-            throw error;
+            throw new CourseError(`Error in update course: ${error}`);
         }
     }
 
@@ -53,10 +54,10 @@ export class CourseServiceImpl implements CourseService {
             console.log(courseId);
             const course = await Course.deleteOne({_id: courseId});
             if (course.deletedCount === 0) return true;
-            else throw new Error(`Course with id ${courseId} not found`);
+            else throw new CourseError(`Course with id ${courseId} not found`);
 
         } catch (error) {
-            throw error;
+            throw new CourseError(`Error in delete course: ${error}`);
         }
     }
 
@@ -64,12 +65,12 @@ export class CourseServiceImpl implements CourseService {
         try {
             const course = await Course.findById(id).populate('addedBy');
             if (!course) {
-                throw new Error(`Course with id ${id} not found`);
+                throw new CourseError(`Course with id ${id} not found`);
             }
 
             return this.mappingService.transformToDTO(course);
         } catch (error) {
-            throw error;
+            throw new CourseError(`Error in find course: ${error}`);
         }
 
     }
@@ -78,11 +79,11 @@ export class CourseServiceImpl implements CourseService {
         try {
             const course = await Course.find().populate('addedBy');
             if (!course) {
-                throw new Error("Courses not found");
+                throw new CourseError("Courses not found");
             }
             return course.map(data => this.mappingService.transformToDTO(data));
         } catch (error) {
-            throw error;
+            throw new CourseError(`Error in find all course: ${error}`);
         }
     }
 
@@ -90,7 +91,7 @@ export class CourseServiceImpl implements CourseService {
         try {
             const course = await Course.findById(courseId);
             if (!course) {
-                throw new Error("Cant not found course with id ${courseId}`);");
+                throw new CourseError("Cant not found course with id ${courseId}`);");
             }
 
             await Course.updateOne(
@@ -101,7 +102,7 @@ export class CourseServiceImpl implements CourseService {
             return true;
         } catch (error) {
             console.error('Error adding module to course:', error);
-            throw new Error('Error adding module to course:' + error); // Update failed
+            throw new CourseError('Error adding module to course:' + error); // Update failed
         }
     }
 
@@ -115,7 +116,7 @@ export class CourseServiceImpl implements CourseService {
             return true;
         } catch (error) {
             console.error('Error deleting module to course:', error);
-            throw new Error('Error deleting module to course:' + error);
+            throw new CourseError('Error deleting module to course:' + error);
         }
     }
 

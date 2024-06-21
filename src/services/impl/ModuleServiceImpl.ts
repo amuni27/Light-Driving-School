@@ -8,6 +8,7 @@ import Modules from "../../model/Modules";
 import {CourseService} from "../CourseService";
 import {CourseServiceImpl} from "./CourseServiceImpl";
 import Module from "../../model/Modules";
+import {ModulesError} from "../../exceptions/ModulesError";
 
 export class ModuleServiceImpl implements ModuleService {
 
@@ -27,12 +28,12 @@ export class ModuleServiceImpl implements ModuleService {
             const module = new Modules(modulesRequestDto);
             const savedModule = await module.save()
             if (!savedModule) {
-                throw new Error("Can't save module");
+                throw new ModulesError("Can't save module");
             }
             console.log(savedModule)
             const result = await this.courseService.addModuleToCourse(modulesRequestDto.courseId, savedModule._id, savedModule.moduleNumber);
             if (!result) {
-                throw new Error("Could not add module to course");
+                throw new ModulesError("Could not add module to course");
             }
 
             const moduleResult = await savedModule.populate("addedBy")
@@ -40,7 +41,7 @@ export class ModuleServiceImpl implements ModuleService {
             await session.endSession();
             return this.mappingService.transformToDTO(moduleResult)
         } catch (error) {
-            throw error;
+            throw new ModulesError(`Error in add module: ${error}`);
         }
     }
 
@@ -48,21 +49,21 @@ export class ModuleServiceImpl implements ModuleService {
         try {
             const modules = await Modules.findById(id);
             if (!modules) {
-                throw new Error(`Module with id ${id} not found`);
+                throw new ModulesError(`Module with id ${id} not found`);
             }
 
             const result = await Modules.updateOne({_id: id}, modulesRequestDto);
             if (!result) {
-                throw new Error(`Failed to update user with id ${id}`);
+                throw new ModulesError(`Failed to update user with id ${id}`);
             }
 
             if (result.modifiedCount === 0) {
-                throw new Error(`No fields were updated for user with id ${id}`);
+                throw new ModulesError(`No fields were updated for user with id ${id}`);
             }
 
             return true;
         } catch (error) {
-            throw error;
+            throw new ModulesError(`Error in update module: ${error}`);
         }
     }
 
@@ -72,19 +73,19 @@ export class ModuleServiceImpl implements ModuleService {
             session.startTransaction();
             const foundedModule = await Module.findById(moduleId);
             if (!foundedModule) {
-                throw new Error(`Module with id ${moduleId} not found`);
+                throw new ModulesError(`Module with id ${moduleId} not found`);
             }
             const result = await this.courseService.deleteModuleToCourse(moduleId, foundedModule.courseId)
             if (!result) {
-                throw new Error(`Failed to delete user with id ${moduleId}`);
+                throw new ModulesError(`Failed to delete user with id ${moduleId}`);
             }
             const module = await Modules.deleteOne({_id: moduleId});
             await session.commitTransaction();
             await session.endSession();
             if (module.deletedCount > 0) return true;
-            else throw new Error(`Module with id ${moduleId} not found and cannot be deleted`);
+            else throw new ModulesError(`Module with id ${moduleId} not found and cannot be deleted`);
         } catch (error) {
-            throw error;
+            throw new ModulesError(`Error in delete module: ${error}`);
         }
     }
 
@@ -92,12 +93,12 @@ export class ModuleServiceImpl implements ModuleService {
         try {
             const module = await Modules.findById(id).populate('addedBy');
             if (!module) {
-                throw new Error(`Module with id ${id} not found`);
+                throw new ModulesError(`Module with id ${id} not found`);
             }
 
             return this.mappingService.transformToDTO(module);
         } catch (error) {
-            throw error;
+            throw new ModulesError(`Error in find module: ${error}`);
         }
 
     }
@@ -106,11 +107,11 @@ export class ModuleServiceImpl implements ModuleService {
         try {
             const modules = await Modules.find().populate('addedBy');
             if (!modules) {
-                throw new Error("Module not found");
+                throw new ModulesError("Module not found");
             }
             return modules.map(data => this.mappingService.transformToDTO(data));
         } catch (error) {
-            throw error;
+            throw new ModulesError(`Error in find all module: ${error}`);
         }
     }
 
@@ -118,7 +119,7 @@ export class ModuleServiceImpl implements ModuleService {
         try {
             const module = await Module.findById(moduleId);
             if (!module) {
-                throw new Error("Cant not found module with id ${moduleId}`);");
+                throw new ModulesError("Cant not found module with id ${moduleId}`);");
             }
 
             const updatedModule = await Module.updateOne(
@@ -126,12 +127,12 @@ export class ModuleServiceImpl implements ModuleService {
                 {$push: {lessons: {_id: lessonId, number: lessonNumber}}}
             );
             if (!updatedModule.acknowledged) {
-                throw new Error(`Cannot add lesson to Module with id ${moduleId}`);
+                throw new ModulesError(`Cannot add lesson to Module with id ${moduleId}`);
             }
             return true;
         } catch (error) {
             console.error('Error adding module to course:', error);
-            throw new Error('Error adding module to course:' + error); // Update failed
+            throw new ModulesError('Error adding module to course:' + error); // Update failed
         }
     }
 
@@ -145,7 +146,7 @@ export class ModuleServiceImpl implements ModuleService {
             return true;
         } catch (error) {
             console.error('Error deleting module to course:', error);
-            throw new Error('Error deleting module to course:' + error);
+            throw new ModulesError('Error deleting module to course:' + error);
         }
     }
 }

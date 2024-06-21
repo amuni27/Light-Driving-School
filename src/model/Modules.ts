@@ -1,4 +1,5 @@
 import mongoose, {Schema} from "mongoose";
+import {IModule} from "../types/model type/IModule";
 
 const ModuleSchema: Schema = new Schema({
     title: {type: String, required: true},
@@ -13,5 +14,5 @@ const ModuleSchema: Schema = new Schema({
     courseId:{type: Schema.Types.ObjectId, ref: 'Course'}
 });
 
-const Module = mongoose.model("Module", ModuleSchema);
+const Module = mongoose.model<IModule>("Module", ModuleSchema);
 export default Module;

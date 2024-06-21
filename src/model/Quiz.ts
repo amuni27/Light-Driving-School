@@ -1,4 +1,5 @@
 import mongoose, {Schema} from "mongoose";
+import {IQuiz} from "../types/model type/IQuiz";
 
 const QuizSchema: Schema = new Schema({
     title: {type: String, required: true},
@@ -11,5 +12,5 @@ const QuizSchema: Schema = new Schema({
     addedBy: {type: Schema.Types.ObjectId, ref: 'User'},
 });
 
-const Quiz = mongoose.model("Quiz", QuizSchema);
+const Quiz = mongoose.model<IQuiz>("Quiz", QuizSchema);
 export default Quiz;
