@@ -60,13 +60,13 @@ Additional Functionality:
 
 ### ER-Diagram
 
-User
+#### User
 
 Attributes: username, email, phoneNumber, password, role, firstName, lastName, coursesEnrolled, progress, timestamps
 Relationships:
 Enrolls in many Courses (Many-to-Many)
 Has many Progress records (One-to-Many)
-Course
+#### Course
 
 Attributes: title, description, modules, addedBy, timestamps
 Relationships:
@@ -74,14 +74,14 @@ Has many Modules (One-to-Many)
 Added by one User (Many-to-One)
 Has many Users enrolled (Many-to-Many)
 Has many Progress records (One-to-Many)
-Module
+#### Module
 
 Attributes: title, description, lessons, addedBy, moduleNumber, courseId, timestamps
 Relationships:
 Belongs to one Course (Many-to-One)
 Has many Lessons (One-to-Many)
 Added by one User (Many-to-One)
-Lesson
+#### Lesson
 
 Attributes: title, description, contents, addedBy, lessonNumber, moduleId, quiz, timestamps
 Relationships:
@@ -89,57 +89,33 @@ Belongs to one Module (Many-to-One)
 Has many Contents (One-to-Many)
 Has one Quiz (One-to-One)
 Added by one User (Many-to-One)
-Content
+#### Content
 
 Attributes: type, title, addedBy, contentNumber, lessonId, timestamps
 Relationships:
 Belongs to one Lesson (Many-to-One)
 Added by one User (Many-to-One)
-Quiz
+#### Quiz
 
 Attributes: title, description, lessonId, questions, addedBy, timestamps
 Relationships:
 Belongs to one Lesson (Many-to-One)
 Has many Questions (One-to-Many)
 Added by one User (Many-to-One)
-Question
+#### Question
 
 Attributes: quizId, type, options, correctAnswerLetter, questionNumber, addedBy, timestamps
 Relationships:
 Belongs to one Quiz (Many-to-One)
 Added by one User (Many-to-One)
-Progress
+#### Progress
 
 Attributes: studentId, courseId, courseContent, finalTestProgress, timestamps
 Relationships:
 Belongs to one User (Many-to-One)
 Belongs to one Course (Many-to-One)
-QuestionProgress
 
-Attributes: questionId, answer, isCorrect, numberOfAttempts
-Relationships:
-Part of Progress (Many-to-One, via discriminator)
-QuizProgress
-
-Attributes: quizId, completedQuestions, score
-Relationships:
-Part of Progress (Many-to-One, via discriminator)
-ContentProgress
-
-Attributes: contentId
-Relationships:
-Part of Progress (Many-to-One, via discriminator)
-LessonProgress
-
-Attributes: lessonId
-Relationships:
-Part of Progress (Many-to-One, via discriminator)
-ModuleProgress
-
-Attributes: moduleId
-Relationships:
-Part of Progress (Many-to-One, via discriminator)
-Choice
+#### Choice
 
 Attributes: choiceLetter, type, content (text, imageUrl, videoUrl, description)
 Relationships:
