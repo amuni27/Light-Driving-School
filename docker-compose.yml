@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  driving-theory-lesson:
+    build: .
+    container_name: driving-theory-lesson
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mongo
+    environment:
+      PORT: 3001
+      MONGODB_URI: mongodb://mongo:27017/driving-school-db
+      JWT_SECRET: 313216546546319
+      PASSWORD_SALT: 20
+volumes:
+  mongo-data:

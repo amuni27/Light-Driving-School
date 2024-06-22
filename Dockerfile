@@ -10,4 +10,17 @@ COPY . .
 
 EXPOSE 3000
 
-CMD ["ts-node", "src/app.ts"]
+CMD ["npx","ts-node", "src/app.ts"]
+
+
+
+#FROM mongo:latest
+#
+#
+#VOLUME /data/db
+#
+## Expose MongoDB port
+#EXPOSE 27017
+#
+## Start MongoDB service
+#CMD ["mongod"]
