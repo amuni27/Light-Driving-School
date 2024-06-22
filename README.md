@@ -62,61 +62,61 @@ Additional Functionality:
 
 #### User
 
-Attributes: username, email, phoneNumber, password, role, firstName, lastName, coursesEnrolled, progress, timestamps
-Relationships:
+##### Attributes: username, email, phoneNumber, password, role, firstName, lastName, coursesEnrolled, progress, timestamps
+#####  Relationships:
 Enrolls in many Courses (Many-to-Many)
 Has many Progress records (One-to-Many)
 #### Course
 
-Attributes: title, description, modules, addedBy, timestamps
-Relationships:
+#####  Attributes: title, description, modules, addedBy, timestamps
+#####  Relationships:
 Has many Modules (One-to-Many)
 Added by one User (Many-to-One)
 Has many Users enrolled (Many-to-Many)
 Has many Progress records (One-to-Many)
 #### Module
 
-Attributes: title, description, lessons, addedBy, moduleNumber, courseId, timestamps
-Relationships:
+##### Attributes: title, description, lessons, addedBy, moduleNumber, courseId, timestamps
+##### Relationships:
 Belongs to one Course (Many-to-One)
 Has many Lessons (One-to-Many)
 Added by one User (Many-to-One)
 #### Lesson
 
-Attributes: title, description, contents, addedBy, lessonNumber, moduleId, quiz, timestamps
-Relationships:
+##### Attributes: title, description, contents, addedBy, lessonNumber, moduleId, quiz, timestamps
+##### Relationships:
 Belongs to one Module (Many-to-One)
 Has many Contents (One-to-Many)
 Has one Quiz (One-to-One)
 Added by one User (Many-to-One)
 #### Content
 
-Attributes: type, title, addedBy, contentNumber, lessonId, timestamps
-Relationships:
+##### Attributes: type, title, addedBy, contentNumber, lessonId, timestamps
+##### Relationships:
 Belongs to one Lesson (Many-to-One)
 Added by one User (Many-to-One)
 #### Quiz
 
-Attributes: title, description, lessonId, questions, addedBy, timestamps
-Relationships:
+##### Attributes: title, description, lessonId, questions, addedBy, timestamps
+##### Relationships:
 Belongs to one Lesson (Many-to-One)
 Has many Questions (One-to-Many)
 Added by one User (Many-to-One)
 #### Question
 
-Attributes: quizId, type, options, correctAnswerLetter, questionNumber, addedBy, timestamps
-Relationships:
+##### Attributes: quizId, type, options, correctAnswerLetter, questionNumber, addedBy, timestamps
+##### Relationships:
 Belongs to one Quiz (Many-to-One)
 Added by one User (Many-to-One)
 #### Progress
 
-Attributes: studentId, courseId, courseContent, finalTestProgress, timestamps
-Relationships:
+##### Attributes: studentId, courseId, courseContent, finalTestProgress, timestamps
+##### Relationships:
 Belongs to one User (Many-to-One)
 Belongs to one Course (Many-to-One)
 
 #### Choice
 
-Attributes: choiceLetter, type, content (text, imageUrl, videoUrl, description)
-Relationships:
+##### Attributes: choiceLetter, type, content (text, imageUrl, videoUrl, description)
+##### Relationships:
 Part of Question (Many-to-One, via subdocument)
