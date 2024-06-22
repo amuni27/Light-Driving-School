@@ -16,11 +16,12 @@ const authorization = new Authorization();
 
 router.post("/", authController.authenticate, authorization.isAdmin, progressController.initializeProgress);
 
-// router.put("/:id", courseController.updateCourse);
+router.put("/:studentId", authController.authenticate, authorization.isAdmin, progressController.changeStatusOfCourseContent);
 //
 // router.delete("/:id", authController.authenticate, courseController.deleteCourse);
 //
 router.get("/:studentId",authController.authenticate , authorization.isAdmin, progressController.getCurrentStudentProgress)
+router.get("/:studentId/:courseContentId",authController.authenticate , authorization.isAdmin, progressController.getByCourseContentTypeById)
 //
 // router.get("/", courseController.findAllCourses)
 

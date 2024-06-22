@@ -119,15 +119,15 @@ export class ProgressServiceImpl implements ProgressService {
                 }
             }, {
                 '$project': {
-                    'currentProgressModule': {
+                    'currentProgressCourseContent': {
                         '$arrayElemAt': [
                             {
                                 '$filter': {
-                                    'input': '$modules',
-                                    'as': 'module',
+                                    'input': '$courseContent',
+                                    'as': 'courseContents',
                                     'cond': {
                                         '$eq': [
-                                            '$$module.status', 'IN_PROGRESS'
+                                            '$$courseContents.status', 'IN_PROGRESS'
                                         ]
                                     }
                                 }
@@ -144,7 +144,7 @@ export class ProgressServiceImpl implements ProgressService {
                                             'as': 'courseContents',
                                             'cond': {
                                                 '$eq': [
-                                                    '$$module.status', 'IN_PROGRESS'
+                                                    '$$courseContents.status', 'IN_PROGRESS'
                                                 ]
                                             }
                                         }
@@ -160,6 +160,63 @@ export class ProgressServiceImpl implements ProgressService {
             throw new ProgressError('No Progress Found');
         }
         return progress;
+    }
+
+    async getByCourseContentTypeById(studentId: string, courseContentId: string): Promise<any> {
+        console.log("studentId", studentId)
+        console.log("co", courseContentId)
+        const progress = await Progress.aggregate([
+            {
+                '$match': {
+                    'studentId': new ObjectId(studentId)
+                }
+            }, {
+                '$unwind': '$courseContent'
+            }, {
+                '$match': {
+                    'courseContent._id': new ObjectId(courseContentId)
+                }
+            }, {
+                '$project': {
+                    '_id': '$courseContent._id',
+                    'kind': '$courseContent.kind',
+                    'status': '$courseContent.status',
+                    'moduleId': '$courseContent.moduleId'
+                }
+            }
+        ])
+        if (!progress) {
+            throw new ProgressError('No Progress Course content Found');
+        }
+        return progress;
+    }
+
+    async changeStatusOfCourseContent(studentId: string, courseContentId: string): Promise<boolean> {
+        console.log(studentId, "string", courseContentId, "string")
+
+        try {
+
+
+            const progress = await Progress.findOneAndUpdate(
+                { studentId: new ObjectId(studentId) }, // Filter by course ID
+                {
+                    $set: {
+                        "courseContent.$[updateElement].status": Status.COMPLETED, // Update status
+                    },
+                },
+                {
+                    arrayFilters: [{ "updateElement._id": courseContentId }], // Filter within array
+                }
+
+            )
+
+            if (!progress) {
+                throw new ProgressError('Progress status can not updated');
+            }
+            return true
+        } catch (erorr) {
+            throw new ProgressError(`Progress status can not updated because of ${erorr}`);
+        }
     }
 
 }

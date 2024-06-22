@@ -31,5 +31,23 @@ export class ProgressController {
             .catch(err => res.status(400).send({error: err.message}))
     }
 
+    getByCourseContentTypeById = (req: Request, res: Response): void => {
+        if (req.user) {
+            req.body.addedBy = req.user.id;
+            console.log("what's up", req.user.id)
+        } else res.status(400).send("You are not logged in.");
+        this.progressService.getByCourseContentTypeById(req.params.studentId, req.params.courseContentId)
+            .then(data => res.status(201).send(data))
+            .catch(err => res.status(400).send({error: err.message}))
+    }
 
+    changeStatusOfCourseContent = (req: Request, res: Response): void => {
+        if (req.user) {
+            req.body.addedBy = req.user.id;
+            console.log("what's up", req.user.id)
+        } else res.status(400).send("You are not logged in.");
+        this.progressService.changeStatusOfCourseContent(req.params.studentId, req.body.courseContentId)
+            .then(data => res.status(201).send(data))
+            .catch(err => res.status(400).send({error: err.message}))
+    }
 }
