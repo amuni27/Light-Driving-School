@@ -6,13 +6,12 @@ const ModuleSchema: Schema = new Schema({
     description: {type: String, required: true},
     lessons: [{
         _id: {type: Schema.Types.ObjectId, ref: 'Lesson'},
-        number: {type: Number, unique: true},
-
+        number: {type: Number, required: true},
     }],
     addedBy: {type: Schema.Types.ObjectId, ref: 'User'},
     moduleNumber: {type: Number, required: true},
     courseId:{type: Schema.Types.ObjectId, ref: 'Course'}
-});
+},{timestamps: true});
 
 const Module = mongoose.model<IModule>("Module", ModuleSchema);
 export default Module;

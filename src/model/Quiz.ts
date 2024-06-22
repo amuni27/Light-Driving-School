@@ -10,7 +10,7 @@ const QuizSchema: Schema = new Schema({
         number: {type: Number, required: true, unique: true},
     }],
     addedBy: {type: Schema.Types.ObjectId, ref: 'User'},
-});
+},{timestamps: true});
 
 const Quiz = mongoose.model<IQuiz>("Quiz", QuizSchema);
 export default Quiz;

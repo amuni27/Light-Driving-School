@@ -8,7 +8,7 @@ export class Authorization {
             console.log(req.user?.role , role)
             if (req.user?.role !== role) {
                 console.warn(`Unauthorized access attempt by user: ${req.user?.id}, required role: ${role}`);
-                return res.status(403).send('Access denied: insufficient permissions');
+                return res.status(403).send({"Access denied": "Unauthorized access attempt by user: ${req.user?.id}, required role: ${role}"});
             }
             next();
         };
@@ -17,4 +17,5 @@ export class Authorization {
     isAdmin = this.checkRole(Role.ADMIN);
 
     isStudent = this.checkRole(Role.STUDENT);
+
 }

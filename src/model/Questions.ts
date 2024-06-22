@@ -10,7 +10,7 @@ const QuestionSchema: Schema = new Schema({
     correctAnswerLetter: {type: String, required: true},
     questionNumber: {type: Number, required: true},
     addedBy: {type: Schema.Types.ObjectId, ref: 'User'},
-}, {discriminatorKey: 'question'})
+}, {discriminatorKey: 'question',timestamps: true}, )
 
 const Question: Model<QuestionType> = mongoose.model<QuestionType>("Question", QuestionSchema)
 

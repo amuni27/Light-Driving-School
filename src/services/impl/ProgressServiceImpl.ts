@@ -1,12 +1,22 @@
 import {Status} from "../../constant/Constant";
 import Course from "../../model/Course";
-import {ContentProgress, IProgress, LessonProgress, ModuleProgress} from "../../types/model type/IProgress";
+import {
+    BaseProgress,
+    ContentProgress,
+    IProgress,
+    LessonProgress,
+    ModuleProgress,
+    QuestionProgress, QuizProgress
+} from "../../types/model type/IProgress";
 import {ProgressService} from "../ProgressService";
 import Modules from "../../model/Modules";
 import Lesson from "../../model/Lesson";
 import Content from "../../model/Content";
 import Progress from "../../model/Progress";
 import {ProgressError} from "../../exceptions/ProgressError";
+import {Schema, Types} from "mongoose";
+import {ObjectId} from 'mongodb'
+
 
 export class ProgressServiceImpl implements ProgressService {
 
@@ -16,7 +26,7 @@ export class ProgressServiceImpl implements ProgressService {
             const progress: IProgress = {
                 studentId: studentId,
                 courseId: courseId,
-                modules: [],
+                courseContent: [],
             };
 
             const course = await Course.findById(courseId);
@@ -34,10 +44,12 @@ export class ProgressServiceImpl implements ProgressService {
                 }
 
                 const moduleProgress: ModuleProgress = {
+                    kind: 'ModuleProgress',
                     moduleId: module._id,
-                    lessons: [],
-                    status: Status.IN_PROGRESS,
+                    status: Status.IN_PROGRESS
                 };
+
+                progress.courseContent.push(moduleProgress);
 
                 // Sort and process lessons
                 const sortedLessons = module.lessons.sort((a, b) => a.number - b.number);
@@ -48,13 +60,13 @@ export class ProgressServiceImpl implements ProgressService {
                     }
 
                     const lessonProgress: LessonProgress = {
+                        kind: 'LessonProgress',
                         lessonId: lesson._id,
-                        contents: [],
-                        status: Status.IN_PROGRESS,
+                        status: Status.IN_PROGRESS
                     };
-                    if (lesson.quiz) {
-                        lessonProgress.quizProgress = {quizId: lesson.quiz.toString(), status: Status.IN_PROGRESS}
-                    }
+
+                    progress.courseContent.push(lessonProgress);
+
 
                     // Sort and process contents
                     const sortedContents = lesson.contents.sort((a, b) => a.number - b.number);
@@ -65,25 +77,89 @@ export class ProgressServiceImpl implements ProgressService {
                         }
 
                         const contentProgress: ContentProgress = {
+                            kind: 'ContentProgress',
                             contentId: content._id,
-                            status: Status.IN_PROGRESS,
+                            status: Status.IN_PROGRESS
                         };
 
-                        lessonProgress.contents.push(contentProgress);
+                        progress.courseContent.push(contentProgress);
                     }
+                    if (lesson.quiz) {
+                        const quizProgress: QuizProgress = {
+                            kind: 'QuizProgress',
+                            quizId: lesson.quiz.toString(),
+                            score: 0,
+                            status: Status.IN_PROGRESS
+                        };
 
-                    moduleProgress.lessons.push(lessonProgress);
+                        progress.courseContent.push(quizProgress);
+                    }
                 }
-
-                progress.modules.push(moduleProgress);
             }
 
-            const saveProgress = await Progress(progress)
-            const savedProgress = saveProgress.save()
+            const newProgress = new Progress(progress);
+            await newProgress.save();
             return true;
         } catch (error) {
             console.error('Error initializing progress:', error);
-            throw new ProgressError('Error deleting module to course:' + error);
+            throw new ProgressError('Error initializing progress: ' + error);
         }
     }
+
+
+    async getCurrentStudentProgress(studentId: string): Promise<any[]> {
+        const progress: any[] = await Progress.aggregate([
+            {
+                '$match': {
+                    'studentId': new ObjectId(studentId)
+                }
+            }, {
+                '$project': {
+                    'courseContent': 1
+                }
+            }, {
+                '$project': {
+                    'currentProgressModule': {
+                        '$arrayElemAt': [
+                            {
+                                '$filter': {
+                                    'input': '$modules',
+                                    'as': 'module',
+                                    'cond': {
+                                        '$eq': [
+                                            '$$module.status', 'IN_PROGRESS'
+                                        ]
+                                    }
+                                }
+                            }, 0
+                        ]
+                    },
+                    'index': {
+                        '$indexOfArray': [
+                            '$courseContent._id', {
+                                '$arrayElemAt': [
+                                    {
+                                        '$filter': {
+                                            'input': '$courseContent',
+                                            'as': 'courseContents',
+                                            'cond': {
+                                                '$eq': [
+                                                    '$$module.status', 'IN_PROGRESS'
+                                                ]
+                                            }
+                                        }
+                                    }, 0
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        ])
+        if (progress.length <= 0) {
+            throw new ProgressError('No Progress Found');
+        }
+        return progress;
+    }
+
 }

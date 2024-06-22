@@ -1,4 +1,4 @@
-export enum Role {STUDENT = 'STUDENT', STAFF = 'STAFF', ADMIN = 'ADMIN'}
+export enum Role {STUDENT = 'STUDENT', STAFF = 'STAFF', ADMIN = 'ADMIN' ,ALL_ACCESSES = 'ALL_ACCESSES'}
 
 export enum ContentConstant {TEXT = 'TEXT', VIDEO = 'VIDEO', AUDIO = 'AUDIO', IMAGE = 'IMAGE'}
 

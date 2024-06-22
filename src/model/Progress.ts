@@ -1,9 +1,12 @@
+import mongoose, {Schema} from "mongoose";
 import {Status} from "../constant/Constant";
 
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const BaseProgressSchema = new Schema({
+    kind: { type: String, required: true },
+    status: { type: String, enum: Status, default: Status.IN_PROGRESS }
+}, { discriminatorKey: 'kind', _id: false });
 
-
+// Specific progress schemas
 const QuestionProgressSchema = new Schema({
     questionId: Schema.Types.ObjectId,
     answer: String,
@@ -11,44 +14,44 @@ const QuestionProgressSchema = new Schema({
     numberOfAttempts: Number,
 });
 
-
 const QuizProgressSchema = new Schema({
     quizId: Schema.Types.ObjectId,
     completedQuestions: [QuestionProgressSchema],
     score: Number,
-    status: {type: String, enum: Status, default: Status.IN_PROGRESS}
 });
 
 const ContentProgressSchema = new Schema({
     contentId: Schema.Types.ObjectId,
-    status: {type: String, enum: Status, default: Status.IN_PROGRESS},
 });
 
 const LessonProgressSchema = new Schema({
     lessonId: Schema.Types.ObjectId,
-    contents: [ContentProgressSchema],
-    status: {type: String, enum: Status, default: Status.IN_PROGRESS},
-    quizProgress: QuizProgressSchema
 });
 
 const ModuleProgressSchema = new Schema({
     moduleId: Schema.Types.ObjectId,
-    lessons: [LessonProgressSchema],
-    status: {type: String, enum: Status, default: Status.IN_PROGRESS},
 });
 
+// Adding base progress schema to each type using discriminators
+const QuestionProgress = BaseProgressSchema.discriminator('QuestionProgress', QuestionProgressSchema);
+const QuizProgress = BaseProgressSchema.discriminator('QuizProgress', QuizProgressSchema);
+const ContentProgress = BaseProgressSchema.discriminator('ContentProgress', ContentProgressSchema);
+const LessonProgress = BaseProgressSchema.discriminator('LessonProgress', LessonProgressSchema);
+const ModuleProgress = BaseProgressSchema.discriminator('ModuleProgress', ModuleProgressSchema);
+
+// Main Progress Schema
 const ProgressSchema = new Schema({
     studentId: Schema.Types.ObjectId,
     courseId: Schema.Types.ObjectId,
-    modules: [ModuleProgressSchema],
+    courseContent: [BaseProgressSchema],
     finalTestProgress: {
         testId: Schema.Types.ObjectId,
         completedQuestions: [QuestionProgressSchema],
         score: Number,
-        status: {type: String, Status, default: Status.IN_PROGRESS}
+        status: { type: String, enum: Status, default: Status.IN_PROGRESS }
     }
-});
+},{timestamps: true});
 
 const Progress = mongoose.model('Progress', ProgressSchema);
 
-export default Progress
+export default Progress;

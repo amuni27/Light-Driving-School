@@ -1,38 +1,50 @@
 import mongoose from "mongoose";
-import {Status} from "../../constant/Constant";
+import { Status } from "../../constant/Constant";
 
-export interface QuestionProgress  {
+// Base Progress Interface
+export interface BaseProgress {
+    kind: string;
+    status: Status;
+}
+
+// Question Progress Interface
+export interface QuestionProgress extends BaseProgress {
     questionId: string;
-    answer: string;
-    isCorrect: boolean;
+    quizId:string;
+    score: number;
     numberOfAttempts: number;
 }
 
-export interface QuizProgress  {
+// Quiz Progress Interface
+export interface QuizProgress extends BaseProgress {
+    kind: 'QuizProgress';
     quizId: string;
     // completedQuestions: QuestionProgress[];
-    // score: number;
-    status: Status;
+    score: number;
 }
 
-export interface ContentProgress  {
+// Content Progress Interface
+export interface ContentProgress extends BaseProgress {
+    kind: 'ContentProgress';
     contentId: string | unknown;
-    status: Status;
 }
 
-export interface LessonProgress  {
-    lessonId: string|unknown;
-    contents: ContentProgress[];
-    status: Status;
+// Lesson Progress Interface
+export interface LessonProgress extends BaseProgress {
+    kind: 'LessonProgress';
+    lessonId: string | unknown;
+    // contents: ContentProgress[];
     quizProgress?: QuizProgress;
 }
 
-export interface ModuleProgress  {
-    moduleId?: string|unknown;
-    lessons: LessonProgress[];
-    status: Status;
+// Module Progress Interface
+export interface ModuleProgress extends BaseProgress {
+    kind: 'ModuleProgress';
+    moduleId?: string | unknown;
+    // lessons: LessonProgress[];
 }
 
+// Final Test Progress Interface
 export interface FinalTestProgress {
     testId: string;
     completedQuestions: QuestionProgress[];
@@ -40,9 +52,10 @@ export interface FinalTestProgress {
     status: Status;
 }
 
+// IProgress Interface with Modules as a Union Type
 export interface IProgress {
     studentId: string;
     courseId: string;
-    modules: ModuleProgress[];
+    courseContent: (ModuleProgress | LessonProgress | ContentProgress | QuizProgress | QuestionProgress)[];
     finalTestProgress?: FinalTestProgress;
 }
